@@ -8,3 +8,4 @@ apscheduler
 jinja2
 openpyxl
 python-multipart
+python-dotenv
