@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="stockView">
+    <input type="hidden" id="currentSymbol" value="{{ symbol }}">
+    <h4 class="mb-4">Match Vol Analysis for <span id="stockTitle" class="text-primary fw-bold">{{ symbol }}</span></h4>
+    <h5 class="mb-4 text-secondary" id="stockCompanyName"></h5>
+
+    <!-- Stock KPIs -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card p-3 border-start border-4 border-primary">
+                <div class="kpi-label">Total Match Volume (Range)</div>
+                <div class="kpi-value" id="stkTotalMatchVol">-</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 border-start border-4 border-success">
+                <div class="kpi-label">Avg Daily Match Vol</div>
+                <div class="kpi-value" id="stkAvgMatchVol">-</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 border-start border-4 border-warning">
+                <div class="kpi-label">Highest Activity Date</div>
+                <div class="kpi-value fs-5" id="stkPeakDate">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Chart -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Daily Volume Breakdown: Match vs Total</span>
+            <select id="chartTypeSelector" class="form-select form-select-sm" style="width: auto;">
+                <option value="bar">Bar Chart</option>
+                <option value="line">Line Chart</option>
+            </select>
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="stockHistoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="card">
+        <div class="card-header">Historical Data</div>
+        <div class="card-body">
+            <table id="stockHistoryTable" class="table table-striped table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th class="text-end">Match Vol</th>
+                        <th class="text-end">Total Stock Vol</th>
+                        <th class="text-end">Match Val</th>
+                        <th class="text-end">% Ratio</th>
+                        <th class="text-end">Implied Price</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

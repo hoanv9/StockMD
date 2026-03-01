@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+requests
+pandas
+apscheduler
+jinja2
+openpyxl
+python-multipart

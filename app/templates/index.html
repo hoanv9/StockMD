@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Negotiated Transaction Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .sidebar {
+            background: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .kpi-label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #34495e;
+        }
+
+        .nav-pills .nav-link {
+            color: #34495e;
+        }
+
+        /* Custom Table Styling */
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #dee2e6;
+            /* Borders for all cells */
+            padding: 10px 8px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        /* Force right alignment for text-end class in tables */
+        .table .text-end {
+            text-align: right !important;
+        }
+
+        .table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        /* Floating Search Styles */
+        #floatingSearchOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        #floatingSearchBox {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 2001;
+        }
+
+        #floatingSearchResults {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .search-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-item:hover,
+        .search-item.active {
+            background-color: #f8f9fa;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Controls -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <h5 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Negotiated Transaction</h5>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Analysis Mode</label>
+                    <div class="nav flex-column nav-pills" id="modeTabs" role="tablist">
+                        <button class="nav-link active text-start" id="market-mode-tab" data-bs-toggle="pill"
+                            data-bs-target="#market-mode" type="button">
+                            <i class="fas fa-globe me-2"></i>Match Vol Overview
+                        </button>
+                        <button class="nav-link text-start" id="stock-mode-tab" data-bs-toggle="pill"
+                            data-bs-target="#stock-mode" type="button">
+                            <i class="fas fa-search me-2"></i>Single Stock
+                        </button>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Date Range</label>
+                    <input type="text" id="fromDate" class="form-control form-control-sm mb-2" placeholder="Start Date">
+                    <input type="text" id="toDate" class="form-control form-control-sm" placeholder="End Date">
+                </div>
+
+                <div class="mb-3 d-none" id="stockSelectorContainer">
+                    <label class="form-label small fw-bold">Select Stock</label>
+                    <select id="symbolFilter" class="form-select form-select-sm w-100"></select>
+                </div>
+
+                <button id="applyFilters" class="btn btn-primary w-100 mb-2"><i class="fas fa-sync-alt me-1"></i> Update
+                    View</button>
+                <button id="exportBtn" class="btn btn-outline-success w-100 btn-sm"><i
+                        class="fas fa-file-excel me-1"></i> Export Data</button>
+
+                <div class="mt-4 pt-4 border-top text-center">
+                    <button id="triggerJobBtn" class="btn btn-link btn-sm text-muted text-decoration-none">
+                        <i class="fas fa-cloud-download-alt me-1"></i> Fetch Latest Data
+                    </button>
+                    <p id="lastUpdateText" class="text-muted mb-0" style="font-size: 0.72rem; line-height: 1.4;">
+                        <i class="fas fa-clock me-1"></i><span id="lastUpdateValue">Loading...</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+
+                <!-- Market Overview View -->
+                <div id="marketView">
+                    <h4 class="mb-4">Match Vol Overview <small class="text-muted fs-6" id="marketDateRange"></small>
+                    </h4>
+
+                    <!-- KPIs -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card p-3">
+                                <div class="kpi-label">Total Match Volume</div>
+                                <div class="kpi-value" id="mktTotalMatchVol">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card p-3">
+                                <div class="kpi-label">Total Match Value</div>
+                                <div class="kpi-value" id="mktTotalMatchVal">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card p-3">
+                                <div class="kpi-label">Top Stock (by Match Vol)</div>
+                                <div class="kpi-value fs-4" id="mktTopStock">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card p-3">
+                                <div class="kpi-label">Avg PT/Total Ratio</div>
+                                <div class="kpi-value" id="mktAvgRatio">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Top Stocks Chart -->
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span>Top 10 Stocks by Match Volume (In Range)</span>
+                                    <select id="marketChartTypeSelector" class="form-select form-select-sm"
+                                        style="width: auto;">
+                                        <option value="bar">Bar Chart</option>
+                                        <option value="line">Line Chart</option>
+                                    </select>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="topStocksChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Exchange Split -->
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">Volume by Exchange</div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="exchangePieChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ranking Table -->
+                    <div class="card">
+                        <div class="card-header">Top 50 Active Stocks (Put-Through)</div>
+                        <div class="card-body">
+                            <table id="marketTable" class="table table-hover table-sm w-100">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Exchange</th>
+                                        <th class="text-end">Total Match Vol</th>
+                                        <th class="text-end">Total Stock Vol</th>
+                                        <th class="text-end">Total Match Val</th>
+                                        <th class="text-end">% Ratio</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Single Stock View -->
+                <div id="stockView" class="d-none">
+                    <h4 class="mb-4">Analysis: <span id="stockTitle" class="text-primary fw-bold">---</span></h4>
+
+                    <!-- Stock KPIs -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card p-3 border-start border-4 border-primary">
+                                <div class="kpi-label">Total Match Volume (Range)</div>
+                                <div class="kpi-value" id="stkTotalMatchVol">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card p-3 border-start border-4 border-success">
+                                <div class="kpi-label">Avg Daily Match Vol</div>
+                                <div class="kpi-value" id="stkAvgMatchVol">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card p-3 border-start border-4 border-warning">
+                                <div class="kpi-label">Highest Activity Date</div>
+                                <div class="kpi-value fs-5" id="stkPeakDate">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Chart -->
+                    <div class="card mb-4">
+                        <div class="card-header">Daily Volume Breakdown: Match vs Total</div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="stockHistoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Table -->
+                    <div class="card">
+                        <div class="card-header">Historical Data</div>
+                        <div class="card-body">
+                            <table id="stockHistoryTable" class="table table-striped table-sm w-100">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th class="text-end">Match Vol</th>
+                                        <th class="text-end">Total Stock Vol</th>
+                                        <th class="text-end">Match Val</th>
+                                        <th class="text-end">% Ratio</th>
+                                        <th class="text-end">Implied Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Floating Search Elements -->
+        <div id="floatingSearchOverlay"></div>
+        <div id="floatingSearchBox">
+            <input type="text" id="floatingInput" class="form-control form-control-lg mb-2"
+                placeholder="Type to search symbol..." autocomplete="off">
+            <div id="floatingSearchResults"></div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="/static/js/app.js?v=1.6"></script>
+</body>
+
+</html>

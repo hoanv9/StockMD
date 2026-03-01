@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="marketView">
+    <h4 class="mb-4">Match Vol Overview <small class="text-muted fs-6" id="marketDateRange"></small></h4>
+
+    <!-- KPIs -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card p-3">
+                <div class="kpi-label">Total Match Volume</div>
+                <div class="kpi-value" id="mktTotalMatchVol">-</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <div class="kpi-label">Total Match Value</div>
+                <div class="kpi-value" id="mktTotalMatchVal">-</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <div class="kpi-label">Top Stock (by Match Vol)</div>
+                <div class="kpi-value fs-4" id="mktTopStock">-</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <div class="kpi-label">Avg PT/Total Ratio</div>
+                <div class="kpi-value" id="mktAvgRatio">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Top 10 Stocks Chart -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header">Top 10 Stocks by Match Volume (In Range)</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="topStocksChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exchange Split -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">Match Volume by Exchange</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="exchangePieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">Total Match/Stock Volume (In Range)</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="totalVolInRangeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">Total Match/Stock Volume (7 Days)</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="totalVol7DaysChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranking Table -->
+    <div class="card">
+        <div class="card-header">Top Stocks by Match Volume (In Range)</div>
+        <div class="card-body">
+            <table id="marketTable" class="table table-hover table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Exchange</th>
+                        <th class="text-end">Total Match Vol</th>
+                        <th class="text-end">Total Stock Vol</th>
+                        <th class="text-end">Total Match Val</th>
+                        <th class="text-end">% Ratio</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
